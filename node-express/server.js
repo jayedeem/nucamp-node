@@ -1,10 +1,11 @@
 const express = require('express');
+const morgan = require('morgan');
+
 const campsiteRouter = require('./routes/campsiteRouter');
 const partnersRouter = require('./routes/partnersRouter');
 const promotionsRouter = require('./routes/promotionsRouter');
-const morgan = require('morgan');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
