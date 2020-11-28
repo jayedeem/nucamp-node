@@ -61,7 +61,9 @@ campsiteRouter
       {
         $set: req.body,
       },
-      { new: true }
+      {
+        new: true,
+      }
     )
       .then((campsite) => {
         res.statusCode = 200;
