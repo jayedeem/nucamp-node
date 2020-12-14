@@ -70,39 +70,33 @@ favoritesRouter
     res.end(`GET operation not supported on /favorite/${req.params.campsiteId}`)
   })
   .post(cors.corsWithOptions, verifyUser, (req, res) => {
-    Favorite.findOne({ user: req.user._id })
-      .then((campsite) => {
-        if (campsite) {
-          if (campsite.campsites.includes(req.params.campsiteId)) {
+    Favorite.findOne({ user: req.user._id }).then((favorites) => {
+      if (favorites) {
+        if (!favorites.campsites.includes(req.params.campsiteId)) {
+          favorites.campsites.push(req.params.campsiteId)
+          favorites.save().then((favorites) => {
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
-            res.json(`This campsite has already included`)
-          } else {
-            campsite.campsites.push(req.params.campsiteId)
-            campsite
-              .save()
-              .then((el) => {
-                res.statusCode = 200
-                res.setHeader('Content-Type', 'application/json')
-                res.json(el)
-              })
-              .catch((err) => next(err))
-          }
-        } else {
-          const favoriteCampsite = new Favorite({
-            user: req.user._id,
-            campsites: req.params.campsiteId
+            res.json(favorites)
           })
-          Favorite.create(favoriteCampsite)
-            .then((favCampsite) => {
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json')
-              res.json(favCampsite)
-            })
-            .catch((err) => next(err))
+        } else {
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'text/plain')
+          res.send('That campsite is already on the list of favorites!')
         }
-      })
-      .catch((err) => next(err))
+      } else {
+        Favorite.create({
+          user: req.user._id,
+          campsites: [req.params.campsiteId]
+        })
+          .then((favorites) => {
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(favorites)
+          })
+          .catch((err) => next(err))
+      }
+    })
   })
   .put(cors.corsWithOptions, verifyUser, (req, res, next) => {
     res.statusCode = 403
